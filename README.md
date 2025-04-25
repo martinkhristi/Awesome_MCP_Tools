@@ -30,3 +30,16 @@ os.environ["SAMBANOVA_API_KEY"] = "your_sambanova_api_key"
 
 🎯 Result
 💬 The agent uses Airbnb's API to return a list of apartments that match the input query, powered by real-time tool execution and fast LLM inference.
+
+📌 Credits
+SambaNova Systems
+
+PraisonAI Agents
+
+OpenBNB MCP Tool
+
+LiteLLM
+
+🌐 Connect
+Have questions or want to collaborate?
+💌 Open an issue or reach out on LinkedIn https://www.linkedin.com/in/martinkhristi/
