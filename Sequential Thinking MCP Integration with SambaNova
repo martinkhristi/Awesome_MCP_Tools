@@ -1,0 +1,26 @@
+import os
+import litellm
+from dotenv import load_dotenv
+from praisonaiagents import Agent, MCP
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Turn on LiteLLM debug mode
+litellm._turn_on_debug()
+
+# Hardcode SambaNova API Key directly
+os.environ["SAMBANOVA_API_KEY"] = "SAMBANOVA_API_KEY"
+
+# Create the Sequential Thinking agent using SambaNova
+sequential_agent = Agent(
+    instructions="""You are a helpful assistant that can break down complex problems.
+    Use the available tools when relevant to perform step-by-step analysis.""",
+    llm="sambanova/Llama-4-Maverick-17B-128E-Instruct",  # ✅ Using SambaNova model
+    tools=MCP(
+        "npx -y @modelcontextprotocol/server-sequential-thinking"
+    )
+)
+
+# Start the Sequential Thinking task
+sequential_agent.start("What is the best way to learn Python?")
