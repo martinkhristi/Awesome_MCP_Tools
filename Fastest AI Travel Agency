@@ -1,0 +1,159 @@
+import os
+import litellm
+from dotenv import load_dotenv
+from praisonaiagents import Agent, Agents, MCP
+from rich import print
+import gradio as gr
+
+# === Load .env file (optional if you use .env)
+load_dotenv()
+
+# === Turn on LiteLLM debug
+litellm._turn_on_debug()
+
+# === API Keys
+SAMBANOVA_API_KEY = "bc2f53d1-06a3-4060-acf9-fe143c3f8acc"
+BRAVE_API_KEY = "BSAxo--TXL0oySBQPkdjVSVYoHV2Vx8"
+
+# Set them into an environment
+os.environ["SAMBANOVA_API_KEY"] = SAMBANOVA_API_KEY
+os.environ["BRAVE_API_KEY"] = BRAVE_API_KEY
+
+# === SambaNova model name
+SAMBA_MODEL = "sambanova/Llama-4-Maverick-17B-128E-Instruct"
+
+# === MCP Tools Setup (only ONE per MCP)
+
+# Brave Search MCP (for real-time web search)
+brave_tool = MCP(
+    "npx -y @modelcontextprotocol/server-brave-search",
+    env={"BRAVE_API_KEY": BRAVE_API_KEY}
+)
+
+# Sequential Thinking MCP (for step-by-step smart planning)
+sequential_tool = MCP(
+    "npx -y @modelcontextprotocol/server-sequential-thinking"
+)
+
+# === Agent Creator Helper
+
+def create_agent(task_instructions, tools):
+    return Agent(
+        instructions=task_instructions,
+        llm=SAMBA_MODEL,
+        tools=tools
+    )
+
+# === Define All Agents
+
+# Travel Research Agent (Brave search)
+research_agent = create_agent(
+    "Research about travel destinations, attractions, local customs, and travel requirements.",
+    tools=brave_tool
+)
+
+# Flight Booking Agent (Brave search)
+flight_agent = create_agent(
+    "Search for available flights, compare prices, and recommend optimal flight choices.",
+    tools=brave_tool
+)
+
+# Accommodation Agent (Brave search)
+hotel_agent = create_agent(
+    "Research hotels and accommodations based on budget and preferences.",
+    tools=brave_tool
+)
+
+# Itinerary Planning Agent (Sequential Thinking)
+itinerary_agent = create_agent(
+    "Design detailed day-by-day travel plans incorporating activities, transport, and rest time.",
+    tools=sequential_tool
+)
+
+# === Travel Plan Generator ===
+
+def generate_travel_plan(destination, dates, budget, preferences):
+    Generate a travel plan using the AI agents"""
+    
+    travel_query = f" Create a comprehensive travel plan for {destination} during {dates}.
+    Budget: {budget}
+    Preferences: {preferences}
+    
+    Include:
+    1. Information about the destination
+    2. Flight recommendations
+    3. Hotel options
+    4. A day-by-day itinerary
+    """
+    
+    agents = Agents(agents=[research_agent, flight_agent, hotel_agent, itinerary_agent])
+    
+    try:
+        result = agents.start(travel_query)
+        
+        formatted_result = f""
+=== TRAVEL PLAN: {destination} ===
+
+Dates: {dates}
+Budget: {budget}
+Preferences: {preferences}
+
+{result}
+"""
+        return formatted_result
+    except Exception as e:
+        return f"Error generating travel plan: {str(e)}"
+
+# === Gradio UI ===
+
+with gr.Blocks(title="AI Travel Agency (Brave + Sequential Thinking)", theme="soft") as demo:
+    gr.Markdown("# 🌍 AI Travel Agency (SambaNova + Brave + Sequential Thinking)")
+    gr.Markdown("Plan your trip using AI agents that think and search intelligently 🚀")
+    
+    With gr.Row():
+        With gr.Column(scale=1):
+            destination = gr.Textbox(label="Destination", placeholder="London, UK", value="London, UK")
+            dates = gr.Textbox(label="Travel Dates", placeholder="August 15-22, 2025", value="August 15-22, 2025")
+            budget = gr.Textbox(label="Budget", placeholder="Mid-range (£1000-£1500)", value="Mid-range (£1000-£1500)")
+            preferences = gr.Textbox(
+                label="Travel Preferences", 
+                placeholder "Historical sites, local cuisine, avoiding crowded tourist traps",
+                value "Historical sites, local cuisine, avoiding crowded tourist traps"
+            )
+            submit_btn = gr.Button("Generate Travel Plan 🚀", variant="primary")
+        
+        with gr.Column(scale=2):
+            output = gr.Markdown(label="Your Travel Plan")
+    
+    submit_btn.click(
+        generate_travel_plan,
+        inputs=[destination, dates, budget, preferences],
+        outputs=output
+    )
+    
+    gr.Markdown("### How to use")
+    gr.Markdown("""
+    1. Enter your destination
+    2. Specify your travel dates
+    3. Indicate your budget range
+    4. Share your travel preferences
+    5. Click 'Generate Travel Plan'
+    
+    *Note: It may take a minute for AI agents to research and create your plan!*
+    """)
+
+# === Run the App ===
+
+if __name__ == "__main__":
+    demo.launch()
+    # demo.launch(share=True)  # Uncomment for public sharing
+
+
+
+
+
+Requirements
+
+Python 3.10 or higher
+Node.js is installed on your system
+SambaNova API key
