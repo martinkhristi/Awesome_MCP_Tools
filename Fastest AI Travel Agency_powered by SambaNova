@@ -12,8 +12,8 @@ load_dotenv()
 litellm._turn_on_debug()
 
 # === API Keys
-SAMBANOVA_API_KEY = "bc2f53d1-06a3-4060-acf9-fe143c3f8acc"
-BRAVE_API_KEY = "BSAxo--TXL0oySBQPkdjVSVYoHV2Vx8"
+SAMBANOVA_API_KEY = "SN_API_KEY"
+BRAVE_API_KEY = "BRAVE_SERCH_API_KEY"
 
 # Set them into an environment
 os.environ["SAMBANOVA_API_KEY"] = SAMBANOVA_API_KEY
